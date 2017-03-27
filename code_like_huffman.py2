@@ -1,0 +1,104 @@
+#!/usr/bin/python
+
+################################
+# Code like Huffman
+# Gabriela Zambrano
+# 6/11/16
+# https://www.codeeval.com/open_challenges/234/
+# https://www.siggraph.org/education/materials/HyperGraph/video/mpeg/mpegfaq/huffman_tutorial.html
+################################
+from collections import Counter
+from copy import deepcopy
+import sys
+
+
+def main(args):
+    f = open(args[0])
+    test_cases = f.readlines()
+    f.close()
+    for tc in test_cases:
+        words = [(word[1], word[0]) for word in
+                 Counter(list(tc.strip('\n'))).most_common()]
+        frequency = sorted(words, key=lambda tup: (tup[0], tup[1]))
+
+        tree = create_tree(frequency)
+        answers = read_from_tree(tree)
+        print '; '.join(['%s: %s' % (ans[0], ans[1]) for ans in answers]) + ';'
+
+
+def read_from_tree(tree):
+    codes = []
+    for k, v in tree.items():
+        traverse_tree(v, '', codes)
+    codes = sorted(codes, key=lambda tup: tup[0])
+    return codes
+
+
+def traverse_tree(val, c, codes):
+    if isinstance(val, tuple):
+        code_decode = (val[1], c)
+        codes.append(code_decode)
+    elif isinstance(val, list):
+        for idx, x in enumerate(val):
+            code = deepcopy(c)
+            if idx % 2 == 0:
+                # Picks the left branch
+                code += '0'
+                traverse_tree(x, code, codes)
+            else:
+                # Picks the right branch
+                code += '1'
+                traverse_tree(x, code, codes)
+    elif isinstance(val, dict):
+        for k, v in val.items():
+            traverse_tree(v, c, codes)
+
+
+def create_tree(frequency_table):
+    tree = {}
+    count = 0
+
+    while True:
+        count +=1
+
+        # First take the lowest 2 elements on the table
+        leaves = deepcopy(frequency_table[:2])
+        frequency_table = frequency_table[2:]
+
+        # Add them to the tree dictionary, using the frequency
+        # totals from the leaves to make the frequency for the
+        # the parent node.
+        key = (leaves[0][0] + leaves[1][0], '*')
+        if not tree:
+            tree[key] = leaves
+        else:
+            # In the event that the key is already in the
+            # tree, modify the node symbol.
+            if key in tree:
+                key = (key[0], key[1]*(count))
+            temp = {key: leaves}
+            
+            for idx, x in enumerate(leaves):
+                if x in tree.keys():
+                    temp[key][idx] = {x: tree[x]}
+                    del tree[x]
+            tree.update(temp)
+
+        # Now sort out what the new frequency table should be
+        # for the next iteration
+        current_frequency = sorted(list(set(frequency_table + tree.keys())),
+                                   key=lambda tup: (tup[0], tup[1]))
+
+        # We break the while loop when the frequency
+        # table we started this iteration with has
+        # no more values, else we continue to the next
+        # iteration.
+        if len(frequency_table) == 0:
+            break
+        frequency_table = current_frequency
+
+    return tree
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

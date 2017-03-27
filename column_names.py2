@@ -1,0 +1,36 @@
+#!/usr/bin/python
+
+"""
+Column Names
+Gabriela Zambrano
+1/10/16
+"""
+from string import ascii_uppercase
+import sys
+
+
+def main(args):
+    input_file = args[0]
+    f = open(input_file)
+    test_cases = f.readlines()
+    f.close()
+    all_combinations = get_column_names()
+    for tc in test_cases:
+        position = int(tc.strip('\n'))
+        print all_combinations[position]
+
+
+def get_column_names():
+    names = ",".join(list(ascii_uppercase))
+    names += ","
+    names += ",".join(["%s%s" % (l, m) for l in ascii_uppercase
+                       for m in ascii_uppercase])
+    names += ","
+    names += ",".join(["%s%s%s" % (l, m, n) for l in ascii_uppercase
+                       for m in ascii_uppercase for n in ascii_uppercase])
+    columns = dict((idx, letter) for idx, letter in enumerate(names.split(','), 1))
+    return columns
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

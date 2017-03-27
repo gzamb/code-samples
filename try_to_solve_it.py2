@@ -1,0 +1,38 @@
+#!/usr/bin/python
+
+"""
+Try to Solve It
+https://www.codeeval.com/open_challenges/226/
+Gabriela Zambrano
+1/10/16
+"""
+import string
+import sys
+
+
+def main(args):
+    input_file = args[0]
+    f = open(input_file)
+    test_cases = f.readlines()
+    f.close()
+    map_translator = decoder()
+    for tc in test_cases:
+        coded_word = [map_translator[l] for l in tc.strip('\n').lower()]
+        print ''.join(coded_word)
+
+
+def decoder():
+    letters = {}
+    for x in xrange(26):
+        if x < 6:
+            letters[string.ascii_lowercase[x]] = string.ascii_lowercase[x + 20]
+        elif 6 <= x < 13:
+            letters[string.ascii_lowercase[x]] = string.ascii_lowercase[x + 7]
+        elif 13 <= x < 20:
+            letters[string.ascii_lowercase[x]] = string.ascii_lowercase[x - 7]
+        else:
+            letters[string.ascii_lowercase[x]] = string.ascii_lowercase[x - 20]
+    return letters
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
